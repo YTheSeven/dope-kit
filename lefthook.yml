@@ -1,0 +1,40 @@
+# Lefthook 配置文件
+# 文档: https://lefthook.dev/configuration/
+
+# 提交前钩子 - 代码格式化和 Lint 检查
+pre-commit:
+  parallel: true
+  jobs:
+    # oxfmt 代码格式化 (支持 TS 和 Vue 文件)
+    - name: oxfmt format
+      run: pnpm oxfmt --write {staged_files}
+      glob: '*.{ts,tsx,vue}'
+
+    # oxlint 检查 TS 文件
+    - name: oxlint (TypeScript)
+      run: pnpm oxlint --config .oxlintrc.json {staged_files}
+      glob: '*.{ts,tsx}'
+
+    # ESLint 检查 Vue 文件
+    - name: eslint (Vue)
+      run: pnpm eslint --max-warnings 0 {staged_files}
+      glob: '*.vue'
+
+    # vue-tsc 类型检查
+    - name: vue-tsc type check
+      run: pnpm vue-tsc --noEmit
+
+# 提交信息钩子 - Commitlint 验证
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm commitlint --edit {1}
+
+# 推送前钩子 - 全量检查 (可选)
+pre-push:
+  jobs:
+    - name: full lint check
+      run: pnpm oxlint --config .oxlintrc.json .
+
+    - name: full type check
+      run: pnpm vue-tsc --noEmit

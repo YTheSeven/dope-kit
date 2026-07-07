@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": ["dist", "node_modules", "public", ".vite", "*.min.js", "coverage", "*.d.ts"],
+
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "quoteProps": "as-needed",
+  "jsxSingleQuote": false,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "always",
+
+  // Vue 专用配置（强烈建议根据团队习惯调整）
+  "vueIndentScriptAndStyle": true, // <script> 和 <style> 内部缩进（推荐 true）
+  "singleAttributePerLine": false, // 每个属性一行（false = 允许多个属性同行）
+  "htmlWhitespaceSensitivity": "css", // 默认值，Vue 模板推荐 css
+  "embeddedLanguageFormatting": "auto", // 自动格式化 script/style 中的 JS/CSS
+
+  // 其他常用配置
+  "endOfLine": "lf",
+  "insertFinalNewline": true,
+
+  // Tailwind CSS 类排序（内置支持，非常好用）
+  "tailwindcss": true
+}
