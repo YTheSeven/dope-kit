@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+
+@source "./**/*.{html,js,ts,jsx,tsx,vue}";
+@source not "./uni_modules";
+@source not "../node_modules";
+@source not "../dist";
+@source not "../unpackage";
+
+/* uni.scss 变量可在 Tailwind @theme 中引用 */
+@theme {
+  /* 颜色 - 与 uni.scss 对齐 */
+  --color-uni-primary: #007aff;
+  --color-uni-success: #4cd964;
+  --color-uni-warning: #f0ad4e;
+  --color-uni-error: #dd524d;
+
+  /* 文字颜色 */
+  --color-uni-text: #333;
+  --color-uni-text-inverse: #fff;
+  --color-uni-text-grey: #999;
+  --color-uni-text-placeholder: #808080;
+
+  /* 背景颜色 */
+  --color-uni-bg: #fff;
+  --color-uni-bg-grey: #f8f8f8;
+  --color-uni-bg-hover: #f1f1f1;
+  --color-uni-bg-mask: rgba(0, 0, 0, 0.4);
+
+  /* 边框颜色 */
+  --color-uni-border: #c8c7cc;
+}

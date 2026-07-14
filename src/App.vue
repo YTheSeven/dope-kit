@@ -14,4 +14,7 @@
     console.log('App Hide');
   });
 </script>
-<style></style>
+
+<style>
+  @import './app.css';
+</style>

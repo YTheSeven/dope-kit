@@ -2,11 +2,13 @@ import { defineConfig } from 'vite';
 import uni from '@dcloudio/vite-plugin-uni';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import path from 'node:path';
+import { WeappTailwindcss } from 'weapp-tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
+const projectRoot = __dirname;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -25,6 +27,12 @@ export default defineConfig({
   plugins: [
     // @ts-expect-error uni 使用 CommonJS 导出，在 ESM 中需通过 .default 访问
     uni.default(),
+    WeappTailwindcss({
+      cssEntries: [resolve(projectRoot, 'src/app.css')],
+      cssOptions: {
+        rem2rpx: true,
+      },
+    }),
     AutoImport({
       include: [
         /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
@@ -56,7 +64,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': resolve(__dirname, 'src'),
     },
   },
   build: {

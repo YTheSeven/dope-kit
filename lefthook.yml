@@ -17,12 +17,13 @@ pre-commit:
 
     # ESLint 检查 Vue 文件
     - name: eslint (Vue)
-      run: pnpm eslint --max-warnings 0 {staged_files}
+      run: pnpm eslint --max-warnings 0 --no-warn-ignored {staged_files}
       glob: '*.vue'
 
     # vue-tsc 类型检查
     - name: vue-tsc type check
       run: pnpm vue-tsc --noEmit
+      glob: '*.{ts,tsx,vue}'
 
 # 提交信息钩子 - Commitlint 验证
 commit-msg:
