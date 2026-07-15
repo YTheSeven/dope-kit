@@ -2,16 +2,13 @@
   import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
 
   onLaunch(() => {
-    // oxlint-disable-next-line no-console
-    console.log('App Launch');
+    // 应用启动
   });
   onShow(() => {
-    // oxlint-disable-next-line no-console
-    console.log('App Show');
+    // 应用显示
   });
   onHide(() => {
-    // oxlint-disable-next-line no-console
-    console.log('App Hide');
+    // 应用隐藏
   });
 </script>
 

@@ -3,3 +3,4 @@ allowBuilds:
   core-js-pure: true
   esbuild: true
   lefthook: true
+  vue-demi: true

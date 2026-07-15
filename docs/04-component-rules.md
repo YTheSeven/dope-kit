@@ -13,14 +13,14 @@
 
 ### 1.1 逻辑分离层级
 
-| 层级     | 位置                    | 职责               | 示例                             |
-| -------- | ----------------------- | ------------------ | -------------------------------- |
-| 页面 UI  | `pages/xxx/index.vue`   | 模板渲染、事件绑定 | `<UserList @load="fetchList" />` |
-| 页面逻辑 | `pages/xxx/useXxx.ts`   | 页面状态、业务流程 | `useUserList()`                  |
-| 全局状态 | `stores/useXxxStore.ts` | 跨页面共享状态     | `useUserStore()`                 |
-| 数据请求 | `api/xxx.ts`            | HTTP 请求封装      | `getUserList()`                  |
-| 通用逻辑 | `composables/useXxx.ts` | 可复用的逻辑       | `useLoading()`                   |
-| 通用组件 | `components/XxxXxx.vue` | 可复用的 UI        | `<AppHeader />`                  |
+| 层级     | 位置                     | 职责               | 示例                              |
+| -------- | ------------------------ | ------------------ | --------------------------------- |
+| 页面 UI  | `pages/xxx/index.vue`    | 模板渲染、事件绑定 | `<user-list @load="fetchList" />` |
+| 页面逻辑 | `pages/xxx/useXxx.ts`    | 页面状态、业务流程 | `useUserList()`                   |
+| 全局状态 | `stores/useXxxStore.ts`  | 跨页面共享状态     | `useUserStore()`                  |
+| 数据请求 | `api/xxx.ts`             | HTTP 请求封装      | `getUserList()`                   |
+| 通用逻辑 | `composables/useXxx.ts`  | 可复用的逻辑       | `useLoading()`                    |
+| 通用组件 | `components/xxx-xxx.vue` | 可复用的 UI        | `<app-header />`                  |
 
 ## 2. Composable 规范
 
@@ -186,12 +186,12 @@ src/stores/
 
 ### 4.1 组件分类
 
-| 类型       | 位置                       | 注册方式    | 示例               |
-| ---------- | -------------------------- | ----------- | ------------------ |
-| 通用组件   | `src/components/`          | 自动注册    | `<AppHeader />`    |
-| 业务组件   | `src/components/business/` | 自动注册    | `<UserCard />`     |
-| 页面子组件 | `pages/xxx/components/`    | 手动 import | `<UserDetail />`   |
-| 页面模块   | `pages/xxx/modules/`       | 手动 import | `<CreateDialog />` |
+| 类型       | 位置                       | 注册方式    | 示例                |
+| ---------- | -------------------------- | ----------- | ------------------- |
+| 通用组件   | `src/components/`          | 自动注册    | `<app-header />`    |
+| 业务组件   | `src/components/business/` | 自动注册    | `<user-card />`     |
+| 页面子组件 | `pages/xxx/components/`    | 手动 import | `<user-detail />`   |
+| 页面模块   | `pages/xxx/modules/`       | 手动 import | `<create-dialog />` |
 
 ### 4.2 组件大小限制
 

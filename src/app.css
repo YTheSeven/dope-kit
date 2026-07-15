@@ -8,7 +8,7 @@
 
 /* uni.scss 变量可在 Tailwind @theme 中引用 */
 @theme {
-  /* 颜色 - 与 uni.scss 对齐 */
+  /* 品牌色 */
   --color-uni-primary: #007aff;
   --color-uni-success: #4cd964;
   --color-uni-warning: #f0ad4e;

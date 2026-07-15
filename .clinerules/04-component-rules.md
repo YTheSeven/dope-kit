@@ -5,7 +5,7 @@
 - 业务逻辑抽离到 composable：页面级放同目录 `useXxx.ts`，通用放 `src/composables/`
 - 全局状态使用 Pinia，store 文件放 `src/stores/`
 - Props 用 `defineProps<T>()`，Emits 用 `defineEmits<T>()`，类型声明
-- 组件命名 PascalCase，事件命名 kebab-case
+- 模板中组件使用 kebab-case，组件文件名 kebab-case（符合 uni-app 规范）
 - 复杂页面拆 `modules/` 子目录，每个子模块独立 .vue + .ts
 - 通用组件放 `src/components/`，自动注册（unplugin-vue-components）
 - 样式统一使用 TailwindCSS 工具类，`.vue` 文件无需 `<style>` 块
