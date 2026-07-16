@@ -44,7 +44,7 @@
     :class="{ 'opacity-50': disabled || loading }"
     @tap="handleTap"
   >
-    <text class="text-[30rpx] text-uni-text-inverse">
+    <text class="text-[size:30rpx] text-uni-text-inverse">
       {{ loading ? '加载中...' : text }}
     </text>
   </view>

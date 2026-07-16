@@ -12,16 +12,21 @@
 <template>
   <view class="min-h-screen bg-uni-bg-grey pb-[20rpx]">
     <!-- 顶部 Banner 区域 -->
-    <view class="bg-uni-primary px-[32rpx] pb-[48rpx]" :style="headerStyle">
-      <text class="text-[40rpx] font-bold">百宝工具箱</text>
-      <text class="mt-[8rpx] text-[26rpx] opacity-80"> 小工具，大趣味 </text>
+    <view
+      class="bg-linear-to-b from-uni-primary-light to-uni-primary px-[32rpx] pb-[48rpx]"
+      :style="headerStyle"
+    >
+      <text class="text-[size:40rpx] font-bold text-uni-text-inverse">百宝工具箱</text>
+      <text class="mt-[8rpx] text-[size:26rpx] text-uni-text-inverse opacity-80">
+        小工具，大趣味
+      </text>
     </view>
 
     <!-- 内容区 -->
     <view class="px-[24rpx]">
       <!-- 热门推荐 -->
       <view class="mt-[24rpx] mb-[32rpx]">
-        <section-title title="🔥 热门推荐" />
+        <section-title title="热门推荐" />
         <app-card padding="p-[16rpx]">
           <view class="grid grid-cols-4">
             <tool-grid-item
@@ -36,7 +41,7 @@
 
       <!-- 最近使用 -->
       <view v-if="recentTools.length > 0" class="mb-[32rpx]">
-        <section-title title="🕐 最近使用" />
+        <section-title title="最近使用" />
         <app-card padding="p-[16rpx]">
           <view class="grid grid-cols-4">
             <tool-grid-item
@@ -51,7 +56,7 @@
 
       <!-- 全部工具 -->
       <view class="mb-[32rpx]">
-        <section-title title="🧰 全部工具" show-more @more="goToCategory" />
+        <section-title title="全部工具" show-more @more="goToCategory" />
         <app-card padding="p-[16rpx]">
           <view class="grid grid-cols-4">
             <tool-grid-item

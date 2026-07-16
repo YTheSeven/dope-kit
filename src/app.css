@@ -28,4 +28,9 @@
 
   /* 边框颜色 */
   --color-uni-border: #c8c7cc;
+
+  /* 扩展 - 渐变/层次 */
+  --color-uni-primary-light: #5ab0ff;
+  --color-uni-bg-soft: #f5f7fa;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
 }

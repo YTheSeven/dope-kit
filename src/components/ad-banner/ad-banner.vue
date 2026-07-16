@@ -24,7 +24,7 @@
       v-if="!loaded || !adConfig.bannerUnitId"
       class="flex items-center justify-center rounded-[12rpx] bg-uni-bg-grey py-[20rpx]"
     >
-      <text class="text-[24rpx]">— 精彩推荐 —</text>
+      <text class="text-[size:24rpx]">— 精彩推荐 —</text>
     </view>
   </view>
 </template>

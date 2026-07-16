@@ -20,7 +20,7 @@ interface UseCanvas2dReturn {
 }
 
 function useCanvas2d(canvasId: string): UseCanvas2dReturn {
-  const canvasRef = ref<unknown>(null);
+  const canvasRef = shallowRef<unknown>(null);
   const dpr = getDevicePixelRatio();
 
   async function initCanvas(): Promise<CanvasContext> {
@@ -62,11 +62,18 @@ function useCanvas2d(canvasId: string): UseCanvas2dReturn {
     if (!canvas) {
       throw new Error('Canvas not initialized');
     }
-    const wxResult = await uni.canvasToTempFilePath({ canvasId, canvas });
+    // Canvas 2D 模式：传 canvas 节点实例，不传 canvasId
+    // 参考 https://developers.weixin.qq.com/miniprogram/dev/api/canvas/wx.canvasToTempFilePath.html
+    // 注意：uni-app 类型定义无 canvas 属性，但微信 Canvas 2D 运行时支持
+    const wxResult = await uni.canvasToTempFilePath({
+      canvas,
+    } as UniNamespace.CanvasToTempFilePathOptions);
     return wxResult.tempFilePath;
     /* #endif */
 
     /* #ifndef MP-WEIXIN */
+    // 非微信端：按 uni-app 文档传 canvasId
+    // 参考 https://uniapp.dcloud.net.cn/api/canvas/canvasToTempFilePath.html
     const result = await uni.canvasToTempFilePath({ canvasId });
     return result.tempFilePath;
     /* #endif */

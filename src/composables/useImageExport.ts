@@ -18,8 +18,7 @@ function useImageExport(): UseImageExportReturn {
     saving.value = true;
     try {
       // 先检查授权
-      const authRes = await uni.getSetting({});
-
+      const authRes = await uni.getSetting();
       if (!authRes.authSetting['scope.writePhotosAlbum']) {
         // 请求授权
         let granted = false;
@@ -49,7 +48,8 @@ function useImageExport(): UseImageExportReturn {
 
       void uni.showToast({ title: '已保存到相册', icon: 'success' });
       return true;
-    } catch {
+    } catch (e) {
+      console.error('保存失败', e);
       void uni.showToast({ title: '保存失败', icon: 'none' });
       return false;
     } finally {

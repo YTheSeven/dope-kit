@@ -57,14 +57,14 @@
       <!-- 左侧：返回按钮 -->
       <view class="w-[60rpx] shrink-0">
         <view v-if="showBackBtn" class="flex items-center justify-center" @tap="handleBack">
-          <text class="text-[44rpx] leading-none" :style="{ color: textColor }">‹</text>
+          <text class="text-[size:44rpx] leading-none" :style="{ color: textColor }">‹</text>
         </view>
       </view>
 
       <!-- 中间：标题 -->
       <view class="flex-1 truncate text-center">
         <slot name="title">
-          <text class="text-[34rpx] font-medium" :style="{ color: textColor }">
+          <text class="text-[size:34rpx] font-medium" :style="{ color: textColor }">
             {{ title }}
           </text>
         </slot>

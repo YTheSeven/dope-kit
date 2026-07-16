@@ -28,7 +28,7 @@
       :class="{ 'opacity-50': saving }"
       @tap="saveToAlbum(src)"
     >
-      <text class="text-[28rpx] text-uni-text-inverse">
+      <text class="text-[size:28rpx] text-uni-text-inverse">
         {{ saving ? '保存中...' : '保存到相册' }}
       </text>
     </view>

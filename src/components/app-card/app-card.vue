@@ -15,7 +15,7 @@
 </script>
 
 <template>
-  <view class="rounded-[16rpx] bg-uni-bg" :class="padding">
+  <view class="shadow-card rounded-[24rpx] border border-black/[0.03] bg-uni-bg" :class="padding">
     <slot />
   </view>
 </template>

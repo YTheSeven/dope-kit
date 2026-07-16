@@ -16,7 +16,11 @@
 
 <template>
   <view class="flex flex-col items-center justify-center py-[120rpx]">
-    <text class="mb-[16rpx] text-[80rpx]">{{ icon }}</text>
-    <text class="text-[28rpx] text-uni-text-grey">{{ text }}</text>
+    <view
+      class="mb-[16rpx] flex h-[160rpx] w-[160rpx] items-center justify-center rounded-full bg-uni-bg-soft"
+    >
+      <text class="text-[size:80rpx]">{{ icon }}</text>
+    </view>
+    <text class="text-[size:28rpx] text-uni-text-grey">{{ text }}</text>
   </view>
 </template>
