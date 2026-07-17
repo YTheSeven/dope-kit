@@ -297,6 +297,8 @@ function drawRoundRect(
   ctx.closePath();
 }
 
+const AVATAR_ROUND_RADIUS = 6;
+
 function drawCircleClip(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): void {
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -304,15 +306,48 @@ function drawCircleClip(ctx: CanvasRenderingContext2D, cx: number, cy: number, r
   ctx.clip();
 }
 
+function drawRoundedRectClip(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+): void {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+  ctx.clip();
+}
+
+function getAvatarClip(platform: ChatPlatform): 'circle' | 'rounded' {
+  return platform === 'wechat' ? 'rounded' : 'circle';
+}
+
 function drawPlaceholderAvatar(
   ctx: CanvasRenderingContext2D,
   p: ChatParticipant,
   cx: number,
   cy: number,
-  radius: number
+  radius: number,
+  platform: ChatPlatform
 ): void {
+  const clip = getAvatarClip(platform);
   ctx.save();
-  drawCircleClip(ctx, cx, cy, radius);
+  if (clip === 'rounded') {
+    const s = radius * 2;
+    drawRoundedRectClip(ctx, cx - radius, cy - radius, s, s, AVATAR_ROUND_RADIUS);
+  } else {
+    drawCircleClip(ctx, cx, cy, radius);
+  }
   ctx.fillStyle = getAvatarColor(p.id);
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
   ctx.fillStyle = '#FFFFFF';
@@ -329,10 +364,17 @@ function drawImageAvatar(
   img: any,
   cx: number,
   cy: number,
-  r: number
+  r: number,
+  platform: ChatPlatform
 ): void {
+  const clip = getAvatarClip(platform);
   ctx.save();
-  drawCircleClip(ctx, cx, cy, r);
+  if (clip === 'rounded') {
+    const s = r * 2;
+    drawRoundedRectClip(ctx, cx - r, cy - r, s, s, AVATAR_ROUND_RADIUS);
+  } else {
+    drawCircleClip(ctx, cx, cy, r);
+  }
   ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
   ctx.restore();
 }
@@ -641,9 +683,9 @@ async function renderChat(
     const acy = y + ar;
     const avImg = avatarMap.get(msg.senderId);
     if (avImg) {
-      drawImageAvatar(ctx, avImg, acx, acy, ar);
+      drawImageAvatar(ctx, avImg, acx, acy, ar, session.platform);
     } else if (participant) {
-      drawPlaceholderAvatar(ctx, participant, acx, acy, ar);
+      drawPlaceholderAvatar(ctx, participant, acx, acy, ar, session.platform);
     }
 
     const bx = AVATAR_MARGIN + AVATAR_SIZE + BUBBLE_GAP;
