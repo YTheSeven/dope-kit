@@ -3,7 +3,7 @@
 
 # 提交前钩子 - 代码格式化和 Lint 检查
 pre-commit:
-  parallel: true
+  parallel: false # 是否并行执行任务，设置为 false 可保证任务按顺序执行，这样在Windows环境下会稳定一点
   jobs:
     # oxfmt 代码格式化 (支持 TS 和 Vue 文件)
     - name: oxfmt format
@@ -33,6 +33,7 @@ commit-msg:
 
 # 推送前钩子 - 全量检查 (可选)
 pre-push:
+  parallel: false # 是否并行执行任务，设置为 false 可保证任务按顺序执行，这样在Windows环境下会稳定一点
   jobs:
     - name: full lint check
       run: pnpm oxlint --config .oxlintrc.json .
