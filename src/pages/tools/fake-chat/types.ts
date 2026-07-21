@@ -59,6 +59,7 @@ interface ChatSession {
   theme: ChatTheme;
   isGroup: boolean;
   statusBarTime: string;
+  unreadCount?: number;
   participants: ChatParticipant[];
   messages: ChatMessage[];
   createdAt: number;

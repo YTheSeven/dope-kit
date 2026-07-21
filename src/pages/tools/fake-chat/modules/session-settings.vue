@@ -19,6 +19,7 @@
     (e: 'update-platform', platform: ChatPlatform): void;
     (e: 'update-theme', theme: ChatTheme): void;
     (e: 'toggle-group', isGroup: boolean): void;
+    (e: 'update-unread-count', count: number): void;
     (e: 'add-participant'): void;
     (e: 'remove-participant', id: string): void;
     (e: 'update-participant', id: string, updates: Partial<ChatParticipant>): void;
@@ -62,8 +63,8 @@
       </picker>
     </view>
 
-    <!-- 平台 -->
-    <view class="flex flex-col gap-[8rpx]">
+    <!-- 平台（暂时隐藏，仅支持微信） -->
+    <view v-if="false" class="flex flex-col gap-[8rpx]">
       <text class="text-[26rpx] text-uni-text-grey">平台</text>
       <view class="flex gap-[16rpx]">
         <view
@@ -108,6 +109,24 @@
       <switch
         :checked="session.isGroup"
         @change="emit('toggle-group', ($event as any).detail.value)"
+      />
+    </view>
+
+    <!-- 未读消息数 -->
+    <view class="flex flex-col gap-[8rpx]">
+      <view class="flex items-center justify-between">
+        <text class="text-[26rpx] text-uni-text-grey">未读消息</text>
+        <text class="text-[28rpx] text-uni-text">{{ session.unreadCount ?? 0 }}</text>
+      </view>
+      <slider
+        :value="session.unreadCount ?? 0"
+        min="0"
+        max="100"
+        step="1"
+        show-value
+        active-color="#07C160"
+        block-color="#07C160"
+        @change="emit('update-unread-count', ($event as any).detail.value)"
       />
     </view>
 

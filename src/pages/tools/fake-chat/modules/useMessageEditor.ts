@@ -13,6 +13,7 @@ interface UseMessageEditorReturn {
   removeMessage: (id: string) => void;
   updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
   moveMessage: (id: string, direction: 'up' | 'down') => void;
+  moveMessageTo: (id: string, targetIndex: number) => void;
   duplicateMessage: (id: string) => void;
 }
 
@@ -68,6 +69,19 @@ function useMessageEditor(session: Ref<ChatSession>): UseMessageEditorReturn {
     session.value.messages = msgs;
   }
 
+  /** 拖拽排序：将消息移动到指定索引位置 */
+  function moveMessageTo(id: string, targetIndex: number): void {
+    const fromIdx = session.value.messages.findIndex((m) => m.id === id);
+    if (fromIdx < 0 || targetIndex < 0 || targetIndex >= session.value.messages.length) return;
+    if (fromIdx === targetIndex) return;
+    const msgs = [...session.value.messages];
+    const [item] = msgs.splice(fromIdx, 1);
+    // 若目标索引在移除元素之后，需减 1 补偿
+    const insertAt = targetIndex > fromIdx ? targetIndex - 1 : targetIndex;
+    msgs.splice(insertAt, 0, item);
+    session.value.messages = msgs;
+  }
+
   function duplicateMessage(id: string): void {
     const idx = session.value.messages.findIndex((m) => m.id === id);
     if (idx < 0) return;
@@ -84,6 +98,7 @@ function useMessageEditor(session: Ref<ChatSession>): UseMessageEditorReturn {
     removeMessage,
     updateMessage,
     moveMessage,
+    moveMessageTo,
     duplicateMessage,
   };
 }

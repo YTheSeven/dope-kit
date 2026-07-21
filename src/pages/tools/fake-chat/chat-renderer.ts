@@ -143,7 +143,7 @@ function getThemeColors(platform: ChatPlatform, theme: ChatTheme): ChatThemeColo
 
 const AVATAR_SIZE = 40;
 const AVATAR_MARGIN = 12;
-const BUBBLE_GAP = 8;
+const BUBBLE_GAP = 12;
 const BUBBLE_PADDING_H = 14;
 const BUBBLE_PADDING_V = 12;
 const FONT_SIZE_TEXT = 16;
@@ -152,13 +152,15 @@ const FONT_SIZE_TITLE = 17;
 const LINE_HEIGHT = 24;
 const MESSAGE_GAP = 16;
 const TIME_SEPARATOR_H = 40;
-const IMAGE_MAX_W = 150;
-const IMAGE_MAX_H = 200;
+const IMAGE_MAX_W = 180;
+const IMAGE_MAX_H = 240;
+const IMAGE_MIN_SIZE = 60;
+const BUBBLE_TAIL_SIZE = 5;
 const VOICE_BUBBLE_MIN_W = 80;
 const REDPACKET_CARD_W = 220;
-const REDPACKET_CARD_H = 88;
+const REDPACKET_CARD_H = 70;
 const TRANSFER_CARD_W = 220;
-const TRANSFER_CARD_H = 88;
+const TRANSFER_CARD_H = 70;
 
 // ==================== 图片加载 ====================
 
@@ -227,6 +229,38 @@ function getBubbleMaxWidth(screenWidth: number): number {
   return screenWidth - 2 * AVATAR_MARGIN - 2 * AVATAR_SIZE - 2 * BUBBLE_GAP;
 }
 
+/**
+ * 微信风格的图片尺寸计算（与 DOM 预览 calcImageStyle 逻辑一致，单位 px）
+ * 等比缩放，最大宽 IMAGE_MAX_W，最大高 IMAGE_MAX_H，最小边 IMAGE_MIN_SIZE
+ */
+function calcImageRenderSize(w: number, h: number): { width: number; height: number } {
+  if (w <= 0 || h <= 0) return { width: 100, height: 130 };
+
+  const ratio = w / h;
+  let fw = IMAGE_MAX_W;
+  let fh = IMAGE_MAX_W / ratio;
+
+  // 如果高度超过最大高度，按最大高度反算宽度
+  if (fh > IMAGE_MAX_H) {
+    fh = IMAGE_MAX_H;
+    fw = IMAGE_MAX_H * ratio;
+  }
+
+  // 如果宽高都小于最小尺寸，等比放大到最小边
+  if (fw < IMAGE_MIN_SIZE && fh < IMAGE_MIN_SIZE) {
+    const scale = IMAGE_MIN_SIZE / Math.min(fw, fh);
+    fw *= scale;
+    fh *= scale;
+  } else if (fw < IMAGE_MIN_SIZE) {
+    // 宽度小于最小宽度，按最小宽度放大
+    const scale = IMAGE_MIN_SIZE / fw;
+    fw = IMAGE_MIN_SIZE;
+    fh *= scale;
+  }
+
+  return { width: Math.round(fw), height: Math.round(fh) };
+}
+
 function measureMessageHeight(
   ctx: CanvasRenderingContext2D,
   msg: ChatMessage,
@@ -243,11 +277,7 @@ function measureMessageHeight(
       return Math.max(n * LINE_HEIGHT + 2 * BUBBLE_PADDING_V, AVATAR_SIZE) + MESSAGE_GAP;
     }
     case 'image': {
-      let h = IMAGE_MAX_H;
-      if (msg.imageWidth > 0 && msg.imageHeight > 0)
-        h =
-          msg.imageHeight *
-          Math.min(IMAGE_MAX_W / msg.imageWidth, IMAGE_MAX_H / msg.imageHeight, 1);
+      const { height: h } = calcImageRenderSize(msg.imageWidth, msg.imageHeight);
       return Math.max(h, AVATAR_SIZE) + MESSAGE_GAP;
     }
     case 'voice':
@@ -294,6 +324,58 @@ function drawRoundRect(
   ctx.arcTo(x, y + h, x, y + h - r, r);
   ctx.lineTo(x, y + r);
   ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+/**
+ * 绘制带尾巴的气泡路径（圆角矩形 + 指向头像的三角）
+ * 可作为 fill 路径或 clip 路径使用
+ */
+function pathRoundRectWithTail(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+  isSelf: boolean,
+  tailCenterY?: number
+): void {
+  const t = BUBBLE_TAIL_SIZE;
+  const cy = tailCenterY ?? y + h / 2;
+
+  ctx.beginPath();
+
+  if (isSelf) {
+    // 尾巴指向右侧（自己头像方向）—— 从尾巴尖开始顺时针画
+    ctx.moveTo(x + w + t, cy);
+    ctx.lineTo(x + w, cy - t);
+    ctx.lineTo(x + w, y + r);
+    ctx.arcTo(x + w, y, x + w - r, y, r);
+    ctx.lineTo(x + r, y);
+    ctx.arcTo(x, y, x, y + r, r);
+    ctx.lineTo(x, y + h - r);
+    ctx.arcTo(x, y + h, x + r, y + h, r);
+    ctx.lineTo(x + w - r, y + h);
+    ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
+    ctx.lineTo(x + w, cy + t);
+    ctx.lineTo(x + w + t, cy);
+  } else {
+    // 尾巴指向左侧（对方头像方向）—— 从尾巴尖开始逆时针画
+    ctx.moveTo(x - t, cy);
+    ctx.lineTo(x, cy + t);
+    ctx.lineTo(x, y + h - r);
+    ctx.arcTo(x, y + h, x + r, y + h, r);
+    ctx.lineTo(x + w - r, y + h);
+    ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
+    ctx.lineTo(x + w, y + r);
+    ctx.arcTo(x + w, y, x + w - r, y, r);
+    ctx.lineTo(x + r, y);
+    ctx.arcTo(x, y, x, y + r, r);
+    ctx.lineTo(x, cy - t);
+    ctx.lineTo(x - t, cy);
+  }
+
   ctx.closePath();
 }
 
@@ -424,8 +506,8 @@ function drawTextBubble(
   const bh = lines.length * LINE_HEIGHT + 2 * BUBBLE_PADDING_V;
   const bx = isSelf ? x + maxW - bw : x;
   ctx.save();
-  drawRoundRect(ctx, bx, y, bw, bh, 6);
   ctx.fillStyle = bg;
+  pathRoundRectWithTail(ctx, bx, y, bw, bh, 6, isSelf, y + 20);
   ctx.fill();
   ctx.restore();
   ctx.fillStyle = fg;
@@ -453,23 +535,30 @@ function drawVoiceBubble(
   const bh = 40;
   const bx = isSelf ? x + maxW - bw : x;
   ctx.save();
-  drawRoundRect(ctx, bx, y, bw, bh, 6);
   ctx.fillStyle = bg;
+  pathRoundRectWithTail(ctx, bx, y, bw, bh, 6, isSelf, y + 20);
   ctx.fill();
   ctx.restore();
   // 声波图标（替代 emoji）
   const waveSize = 16;
   const waveY = y + (bh - waveSize) / 2;
   if (isSelf) {
-    drawVoiceWaveIcon(ctx, bx + BUBBLE_PADDING_H, waveY, waveSize, icon, 'left');
+    // 自身：图标靠右（靠近头像），镜像 SVG 让小波在右（近头像），大波在左（近文字）
+    drawVoiceWaveIcon(ctx, bx + bw - BUBBLE_PADDING_H - waveSize, waveY, waveSize, icon, 'left');
+    ctx.fillStyle = fg;
+    ctx.font = `${FONT_SIZE_SMALL}px sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${dur}"`, bx + bw - BUBBLE_PADDING_H - waveSize - 4, y + bh / 2);
   } else {
+    // 对方：图标靠左（靠近头像），文字靠右
     drawVoiceWaveIcon(ctx, bx + BUBBLE_PADDING_H, waveY, waveSize, icon, 'right');
+    ctx.fillStyle = fg;
+    ctx.font = `${FONT_SIZE_SMALL}px sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${dur}"`, bx + BUBBLE_PADDING_H + waveSize + 4, y + bh / 2);
   }
-  ctx.fillStyle = fg;
-  ctx.font = `${FONT_SIZE_SMALL}px sans-serif`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`${dur}"`, bx + BUBBLE_PADDING_H + waveSize + 4, y + bh / 2);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   return bh;
@@ -483,37 +572,47 @@ function drawRedpacketCard(
   maxW: number,
   bg: string,
   fg: string,
-  isSelf: boolean
+  isSelf: boolean,
+  iconImg: unknown
 ): number {
   const cw = Math.min(REDPACKET_CARD_W, maxW);
   const bx = isSelf ? x + maxW - cw : x;
-  const PAD = 12;
-  const ICON_SIZE = 28;
+  const PAD = 8;
+  const ICON_SIZE = 39;
+  const ICON_W = Math.round((ICON_SIZE * 130) / 162); // 31px，保持 SVG 比例 130:162
+  const ICON_PAD_H = Math.floor((ICON_SIZE - ICON_W) / 2); // 4px，水平居中于同宽方形区域
+  const FONT_SIZE = 13;
 
   // Card background
   ctx.save();
-  drawRoundRect(ctx, bx, y, cw, REDPACKET_CARD_H, 10);
   ctx.fillStyle = bg;
+  pathRoundRectWithTail(ctx, bx, y, cw, REDPACKET_CARD_H, 10, isSelf, y + 20);
   ctx.fill();
   ctx.restore();
-
-  // Row 1: 🧧 emoji + amount (bold)
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.font = '28px sans-serif';
-  ctx.fillText('🧧', bx + PAD, y + PAD);
-  ctx.fillStyle = fg;
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillText(`¥${msg.amount || '0.00'}`, bx + PAD + 34, y + PAD + 6);
 
-  // Row 2: title (normal weight)
-  ctx.font = '13px sans-serif';
-  ctx.fillText(msg.redpacketTitle, bx + PAD + 34, y + PAD + ICON_SIZE + 6);
+  // Icon
+  const iconX = bx + PAD;
+  const iconY = y + PAD;
+  if (iconImg) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ctx.drawImage(iconImg as any, iconX + ICON_PAD_H, iconY, ICON_W, ICON_SIZE);
+  }
+
+  // 标题垂直居中于图标
+  const iconCenterY = iconY + ICON_SIZE / 2;
+  const textX = iconX + ICON_SIZE + 4;
+
+  ctx.fillStyle = fg;
+  ctx.font = `${FONT_SIZE}px sans-serif`;
+  // textBaseline 为 top，计算文字起始 Y 使文字中线对齐图标中线
+  ctx.fillText(msg.redpacketTitle, textX, iconCenterY - FONT_SIZE / 2);
 
   // Footer
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.font = '10px sans-serif';
-  ctx.fillText('微信红包', bx + PAD, y + REDPACKET_CARD_H - 10);
+  ctx.fillText('微信红包', bx + PAD, y + REDPACKET_CARD_H - 14);
 
   return REDPACKET_CARD_H;
 }
@@ -531,40 +630,51 @@ function drawTransferCard(
 ): number {
   const cw = Math.min(TRANSFER_CARD_W, maxW);
   const bx = isSelf ? x + maxW - cw : x;
-  const PAD = 12;
-  const ICON_SIZE = 28;
+  const PAD = 8;
+  const ICON_SIZE = 39;
+  const FONT_SIZE = 13;
+  const TEXT_GAP = 3;
 
   // Card background
   ctx.save();
-  drawRoundRect(ctx, bx, y, cw, TRANSFER_CARD_H, 10);
   ctx.fillStyle = bg;
+  pathRoundRectWithTail(ctx, bx, y, cw, TRANSFER_CARD_H, 10, isSelf, y + 20);
   ctx.fill();
   ctx.restore();
 
-  // Row 1: icon + amount (bold)
+  // Icon
+  const iconX = bx + PAD;
+  const iconY = y + PAD;
   if (iconImg) {
     ctx.save();
     ctx.filter = 'brightness(0) invert(1)';
-    drawRoundRect(ctx, bx + PAD, y + PAD, ICON_SIZE, ICON_SIZE, 4);
+    drawRoundRect(ctx, iconX, iconY, ICON_SIZE, ICON_SIZE, 6);
     ctx.clip();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ctx.drawImage(iconImg as any, bx + PAD, y + PAD, ICON_SIZE, ICON_SIZE);
+    ctx.drawImage(iconImg as any, iconX, iconY, ICON_SIZE, ICON_SIZE);
     ctx.restore();
   }
+
+  // 两行文字垂直居中于图标
+  const iconCenterY = iconY + ICON_SIZE / 2;
+  const twoLinesH = FONT_SIZE + TEXT_GAP + FONT_SIZE;
+  const textY = iconCenterY - twoLinesH / 2;
+  const textX = iconX + ICON_SIZE + 4;
+
   ctx.fillStyle = fg;
-  ctx.font = 'bold 13px sans-serif';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillText(`¥${msg.amount || '0.00'}`, bx + PAD + ICON_SIZE + 8, y + PAD + 6);
+  ctx.font = `bold ${FONT_SIZE}px sans-serif`;
+  ctx.fillText(`¥${msg.amount || '0.00'}`, textX, textY);
 
   // Row 2: label (normal weight)
-  ctx.font = '13px sans-serif';
-  ctx.fillText(msg.transferNote || '转账', bx + PAD + ICON_SIZE + 8, y + PAD + ICON_SIZE + 6);
+  ctx.font = `${FONT_SIZE}px sans-serif`;
+  ctx.fillText(msg.transferNote || '转账', textX, textY + FONT_SIZE + TEXT_GAP);
 
   // Footer
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.font = '10px sans-serif';
-  ctx.fillText('微信转账', bx + PAD, y + TRANSFER_CARD_H - 10);
+  ctx.fillText('转账', bx + PAD, y + TRANSFER_CARD_H - 14);
 
   return TRANSFER_CARD_H;
 }
@@ -576,9 +686,9 @@ async function renderChat(
   canvas: unknown,
   session: ChatSession,
   config: RenderConfig
-): Promise<void> {
+): Promise<number> {
   const colors = getThemeColors(session.platform, session.theme);
-  const { screenWidth, statusBarHeight, titleBarHeight, bottomBarHeight, canvasHeight } = config;
+  const { screenWidth, statusBarHeight, titleBarHeight, bottomBarHeight } = config;
 
   // 预加载头像 & 图片
   const avatarMap = new Map<string, unknown>();
@@ -600,10 +710,26 @@ async function renderChat(
     canvas,
     '/static/chat/wecaht/transfer/transfer.svg'
   );
+  // 预加载红包图标
+  const redpacketIconImg = await loadCanvasImage(canvas, '/static/chat/wecaht/red_packet.svg');
 
-  // 1. 背景 - 填满整个画布
+  // 1. 计算实际总高度，至少与配置的最小高度一致
+  const minHeight = config.canvasHeight;
+  const actualHeight = Math.max(measureTotalHeight(ctx, session, config), minHeight);
+
+  // 调整 Canvas 缓冲区大小以匹配实际内容高度
+  /* #ifdef MP-WEIXIN */
+  const canvasEl = canvas as { width: number; height: number };
+  const dpr = (canvasEl.width || 1) / config.screenWidth;
+  if (canvasEl.height !== actualHeight * dpr) {
+    canvasEl.height = actualHeight * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  /* #endif */
+
+  // 背景 - 填满整个画布
   ctx.fillStyle = colors.background;
-  ctx.fillRect(0, 0, screenWidth, canvasHeight);
+  ctx.fillRect(0, 0, screenWidth, actualHeight);
 
   let y = 0;
 
@@ -653,13 +779,35 @@ async function renderChat(
   // 3. 标题栏
   ctx.fillStyle = colors.titleBarBg;
   ctx.fillRect(0, y, screenWidth, titleBarHeight);
-  // 返回箭头 & 更多按钮
+  // 返回箭头 & 更多按钮 & 未读气泡
   {
     const tbIconSize = Math.min(24, titleBarHeight * 0.55);
     const tbIconColor = colors.titleBarText;
     const tbIconY = y + (titleBarHeight - tbIconSize) / 2;
     drawBackIcon(ctx, 12, tbIconY, tbIconSize, tbIconSize, tbIconColor);
     drawMoreIcon(ctx, screenWidth - 12 - tbIconSize, tbIconY, tbIconSize, tbIconSize, tbIconColor);
+
+    // 未读气泡
+    const unread = session.unreadCount;
+    if (unread && unread > 0) {
+      const badgeText = unread > 99 ? '99+' : String(unread);
+      const badgeHeight = Math.max(14, tbIconSize * 0.55);
+      ctx.font = `${Math.round(badgeHeight * 0.7)}px sans-serif`;
+      const textW = ctx.measureText(badgeText).width;
+      const badgeW = Math.max(badgeHeight, textW + 8);
+      const badgeX = 12 + tbIconSize + 4;
+      const badgeY = y + (titleBarHeight - badgeHeight) / 2;
+      const badgeR = badgeHeight / 2;
+
+      ctx.fillStyle = '#B0B0B0';
+      drawRoundRect(ctx, badgeX, badgeY, badgeW, badgeHeight, badgeR);
+      ctx.fill();
+
+      ctx.fillStyle = colors.titleBarText;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(badgeText, badgeX + badgeW / 2, badgeY + badgeHeight / 2);
+    }
   }
   ctx.fillStyle = colors.titleBarText;
   ctx.font = `bold ${FONT_SIZE_TITLE}px sans-serif`;
@@ -706,21 +854,14 @@ async function renderChat(
         break;
       case 'image': {
         const im = imageMap.get(msg.id);
-        let iw = IMAGE_MAX_W;
-        let ih = IMAGE_MAX_H;
-        if (msg.imageWidth > 0 && msg.imageHeight > 0) {
-          const sc = Math.min(IMAGE_MAX_W / msg.imageWidth, IMAGE_MAX_H / msg.imageHeight, 1);
-          iw = msg.imageWidth * sc;
-          ih = msg.imageHeight * sc;
-        }
+        const { width: iw, height: ih } = calcImageRenderSize(msg.imageWidth, msg.imageHeight);
         const ix = isSelf ? bx + bw - iw : bx;
+        ctx.save();
         if (im) {
-          ctx.save();
           drawRoundRect(ctx, ix, y, iw, ih, 6);
           ctx.clip();
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ctx.drawImage(im as any, ix, y, iw, ih);
-          ctx.restore();
         } else {
           ctx.fillStyle = '#CCCCCC';
           drawRoundRect(ctx, ix, y, iw, ih, 6);
@@ -731,6 +872,7 @@ async function renderChat(
           ctx.fillText('图片', ix + iw / 2, y + ih / 2 + 5);
           ctx.textAlign = 'left';
         }
+        ctx.restore();
         bh = ih;
         break;
       }
@@ -756,7 +898,8 @@ async function renderChat(
           bw,
           colors.redpacketBg,
           colors.redpacketText,
-          isSelf
+          isSelf,
+          redpacketIconImg
         );
         break;
       case 'transfer':
@@ -777,7 +920,7 @@ async function renderChat(
   }
 
   // 5. 底部输入栏 - 固定在画布底部（模拟真实手机截图）
-  const inputBarY = canvasHeight - bottomBarHeight;
+  const inputBarY = actualHeight - bottomBarHeight;
   ctx.fillStyle = colors.inputBarBg;
   ctx.fillRect(0, inputBarY, screenWidth, bottomBarHeight);
   ctx.strokeStyle = colors.inputBarBorder;
@@ -811,6 +954,8 @@ async function renderChat(
       ctx.fill();
     }
   }
+
+  return actualHeight;
 }
 
 export { getDefaultRenderConfig, getThemeColors, measureTotalHeight, renderChat };

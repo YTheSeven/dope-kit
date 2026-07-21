@@ -106,6 +106,7 @@ function createDefaultSession(): ChatSession {
     theme: 'light',
     isGroup: false,
     statusBarTime: '9:41',
+    unreadCount: 0,
     participants: [{ ...DEFAULT_SELF }, { ...DEFAULT_OTHER }],
     messages: [],
     createdAt: Date.now(),

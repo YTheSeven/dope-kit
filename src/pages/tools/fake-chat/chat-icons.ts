@@ -423,8 +423,11 @@ function drawAddIcon(
 // ==================== 语音气泡图标 ====================
 
 /**
- * 绘制语音气泡内的声波图标（3 段弧线）
- * @param direction 'right' → )))  'left' → (((
+ * 绘制语音气泡内的声波图标
+ *
+ * 精确匹配 list_voice.svg 设计：3 个水滴/叶形波形，从左到右依次增大
+ * SVG viewBox: 0 0 8 11.3137
+ * @param direction 'left' → 波峰朝左（`((( `，用于自己），'right' → 波峰朝右（`)))`，用于对方）
  */
 function drawVoiceWaveIcon(
   ctx: CanvasRenderingContext2D,
@@ -437,24 +440,123 @@ function drawVoiceWaveIcon(
   ctx.save();
   ctx.fillStyle = color;
   ctx.globalAlpha = 0.9;
-  // 绘制 3 层实心弧形段，匹配 list_voice.svg 设计
-  const cx = x + size / 2;
-  const cy = y + size / 2;
-  // 外弧 → 中弧 → 内弧（每段跨度约 170°）
-  const segments = [
-    { outerR: size * 0.48, innerR: size * 0.37 },
-    { outerR: size * 0.3, innerR: size * 0.21 },
-    { outerR: size * 0.18, innerR: size * 0.09 },
-  ];
-  const startAngle = direction === 'right' ? -Math.PI * 0.48 : Math.PI * 0.52;
-  const endAngle = direction === 'right' ? Math.PI * 0.48 : Math.PI * 1.48;
-  for (const seg of segments) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, seg.outerR, startAngle, endAngle);
-    ctx.arc(cx, cy, seg.innerR, endAngle, startAngle, true);
-    ctx.closePath();
-    ctx.fill();
+
+  // SVG viewBox 高度为缩放基准
+  const sc = size / 11.3137;
+  const ox = x;
+  const oy = y;
+
+  // 自身消息（右侧气泡）需要镜像，让波峰朝左
+  if (direction === 'left') {
+    ctx.translate(ox + size, 0);
+    ctx.scale(-1, 1);
+    ctx.translate(-ox, 0);
   }
+
+  // === Bar 3（最右、最大）===
+  ctx.beginPath();
+  ctx.moveTo(ox + 6.8 * sc, oy + 5.6569 * sc);
+  ctx.bezierCurveTo(
+    ox + 6.8 * sc,
+    oy + 7.4859 * sc,
+    ox + 6.0761 * sc,
+    oy + 9.1974 * sc,
+    ox + 4.8083 * sc,
+    oy + 10.4652 * sc
+  );
+  ctx.lineTo(ox + 5.6569 * sc, oy + 11.3137 * sc);
+  ctx.bezierCurveTo(
+    ox + 7.1046 * sc,
+    oy + 9.866 * sc,
+    ox + 8.0 * sc,
+    oy + 7.866 * sc,
+    ox + 8.0 * sc,
+    oy + 5.6569 * sc
+  );
+  ctx.bezierCurveTo(
+    ox + 8.0 * sc,
+    oy + 3.4477 * sc,
+    ox + 7.1046 * sc,
+    oy + 1.4477 * sc,
+    ox + 5.6569 * sc,
+    oy + 0
+  );
+  ctx.lineTo(ox + 4.8083 * sc, oy + 0.8485 * sc);
+  ctx.bezierCurveTo(
+    ox + 6.0761 * sc,
+    oy + 2.1163 * sc,
+    ox + 6.8 * sc,
+    oy + 3.8278 * sc,
+    ox + 6.8 * sc,
+    oy + 5.6569 * sc
+  );
+  ctx.closePath();
+  ctx.fill();
+
+  // === Bar 2（中间）===
+  ctx.beginPath();
+  ctx.moveTo(ox + 4.0 * sc, oy + 5.6569 * sc);
+  ctx.bezierCurveTo(
+    ox + 4.0 * sc,
+    oy + 6.7332 * sc,
+    ox + 3.5745 * sc,
+    oy + 7.7392 * sc,
+    ox + 2.8284 * sc,
+    oy + 8.4853 * sc
+  );
+  ctx.lineTo(ox + 3.677 * sc, oy + 9.3338 * sc);
+  ctx.bezierCurveTo(
+    ox + 4.618 * sc,
+    oy + 8.3928 * sc,
+    ox + 5.2 * sc,
+    oy + 7.0928 * sc,
+    ox + 5.2 * sc,
+    oy + 5.6569 * sc
+  );
+  ctx.bezierCurveTo(
+    ox + 5.2 * sc,
+    oy + 4.2209 * sc,
+    ox + 4.618 * sc,
+    oy + 2.9209 * sc,
+    ox + 3.677 * sc,
+    oy + 1.9799 * sc
+  );
+  ctx.lineTo(ox + 2.8284 * sc, oy + 2.8284 * sc);
+  ctx.bezierCurveTo(
+    ox + 3.5745 * sc,
+    oy + 3.5745 * sc,
+    ox + 4.0 * sc,
+    oy + 4.5805 * sc,
+    ox + 4.0 * sc,
+    oy + 5.6569 * sc
+  );
+  ctx.closePath();
+  ctx.fill();
+
+  // === Bar 1（最左、最小）===
+  ctx.beginPath();
+  ctx.moveTo(ox + 2.4 * sc, oy + 5.6569 * sc);
+  ctx.bezierCurveTo(
+    ox + 2.4 * sc,
+    oy + 6.3196 * sc,
+    ox + 2.1314 * sc,
+    oy + 6.9196 * sc,
+    ox + 1.6971 * sc,
+    oy + 7.3539 * sc
+  );
+  ctx.lineTo(ox + 0, oy + 5.6569 * sc);
+  ctx.lineTo(ox + 1.6971 * sc, oy + 3.9598 * sc);
+  ctx.bezierCurveTo(
+    ox + 2.1314 * sc,
+    oy + 4.3941 * sc,
+    ox + 2.4 * sc,
+    oy + 4.9941 * sc,
+    ox + 2.4 * sc,
+    oy + 5.6569 * sc
+  );
+  ctx.closePath();
+  ctx.fill();
+
   ctx.restore();
 }
 

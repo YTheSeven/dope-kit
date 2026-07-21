@@ -13,6 +13,7 @@ interface UseSessionSettingsReturn {
   updatePlatform: (platform: ChatPlatform) => void;
   updateTheme: (theme: ChatTheme) => void;
   toggleGroup: (isGroup: boolean) => void;
+  updateUnreadCount: (count: number) => void;
   addParticipant: () => void;
   removeParticipant: (id: string) => void;
   updateParticipant: (id: string, updates: Partial<ChatParticipant>) => void;
@@ -41,6 +42,10 @@ function useSessionSettings(session: Ref<ChatSession>): UseSessionSettingsReturn
     if (isGroup && session.value.participants.filter((p) => !p.isSelf).length < 2) {
       addParticipant();
     }
+  }
+
+  function updateUnreadCount(count: number): void {
+    session.value.unreadCount = count;
   }
 
   function addParticipant(): void {
@@ -95,6 +100,7 @@ function useSessionSettings(session: Ref<ChatSession>): UseSessionSettingsReturn
     updatePlatform,
     updateTheme,
     toggleGroup,
+    updateUnreadCount,
     addParticipant,
     removeParticipant,
     updateParticipant,

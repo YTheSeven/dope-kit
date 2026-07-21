@@ -43,13 +43,13 @@
     @tap="emit('cancel')"
   >
     <view class="w-full rounded-t-[24rpx] bg-uni-bg p-[24rpx]" @tap.stop>
-      <text class="mb-[20rpx] block text-[32rpx] font-bold text-uni-text">
+      <text class="mb-[20rpx] block text-[size:32rpx] font-bold text-uni-text">
         {{ editMessage ? '编辑消息' : '添加消息' }}
       </text>
 
       <!-- 发送方 -->
       <view class="mb-[20rpx]">
-        <text class="mb-[8rpx] block text-[26rpx] text-uni-text-grey">发送方</text>
+        <text class="mb-[8rpx] block text-[size:26rpx] text-uni-text-grey">发送方</text>
         <view class="flex flex-wrap gap-[12rpx]">
           <view
             v-for="p in participants"
@@ -86,7 +86,7 @@
           />
         </view>
         <view
-          class="rounded-[12rpx] bg-uni-bg-grey py-[20rpx] text-center text-[28rpx] text-uni-primary"
+          class="rounded-[12rpx] bg-uni-bg-grey py-[20rpx] text-center text-[size:28rpx] text-uni-primary"
           @tap="chooseImage"
         >
           选择图片
@@ -95,7 +95,7 @@
 
       <!-- 语音 -->
       <view v-if="form.type === 'voice'" class="mb-[20rpx]">
-        <text class="mb-[8rpx] block text-[26rpx] text-uni-text-grey">时长(秒)</text>
+        <text class="mb-[8rpx] block text-[size:26rpx] text-uni-text-grey">时长(秒)</text>
         <input
           v-model="form.voiceDuration"
           type="number"
@@ -152,7 +152,7 @@
           取消
         </view>
         <view
-          class="flex-1 rounded-[12rpx] bg-uni-primary py-[16rpx] text-center text-[28rpx] text-uni-text-inverse"
+          class="flex-1 rounded-[12rpx] bg-uni-primary py-[16rpx] text-center text-[size:28rpx] text-uni-text-inverse"
           @tap="handleConfirm"
         >
           确认

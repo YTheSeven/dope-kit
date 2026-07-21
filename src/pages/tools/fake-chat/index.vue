@@ -31,13 +31,13 @@
     saveDraft,
     resetSession,
     removeMessage,
-    moveMessage,
     duplicateMessage,
     updateTitle,
     updateStatusBarTime,
     updatePlatform,
     updateTheme,
     toggleGroup,
+    updateUnreadCount,
     addParticipant,
     removeParticipant,
     updateParticipant,
@@ -71,7 +71,6 @@
       @open-add-modal="openAddModal"
       @open-edit-modal="openEditModal"
       @remove-message="removeMessage"
-      @move-message="moveMessage"
       @duplicate-message="duplicateMessage"
       @add-quick-message="addQuickMessage"
       @change-sender="changeSender"
@@ -89,6 +88,7 @@
       @update-platform="updatePlatform"
       @update-theme="updateTheme"
       @toggle-group="toggleGroup"
+      @update-unread-count="updateUnreadCount"
       @add-participant="addParticipant"
       @remove-participant="removeParticipant"
       @update-participant="updateParticipant"

@@ -80,17 +80,13 @@ function useFakeChat() {
     try {
       const adOk = await showRewardedForExport();
       if (!adOk) return;
-      // Canvas 高度：至少一个屏幕高，消息多时按内容估算
-      canvasHeight.value = Math.max(
-        session.value.messages.length * 80 + 250,
-        uni.getWindowInfo().windowHeight
-      );
+      // Canvas 高度：先用默认值，渲染后自动计算精确高度
+      canvasHeight.value = uni.getWindowInfo().windowHeight;
       showCanvas.value = true;
       await nextTick();
-      // oxlint-disable-next-line promise/avoid-new
-      await new Promise((resolve) => setTimeout(resolve, 200));
       const { ctx, canvas } = await initCanvas();
-      await renderChat(ctx, canvas, session.value, getDefaultRenderConfig());
+      const actualHeight = await renderChat(ctx, canvas, session.value, getDefaultRenderConfig());
+      canvasHeight.value = actualHeight;
       const filePath = await exportImage();
       showCanvas.value = false;
 
@@ -139,6 +135,29 @@ function useFakeChat() {
     }
   });
 
+  // 设置数据变更时自动保存草稿（防抖 500ms）
+  const settingsSnapshot = computed(() => ({
+    title: session.value.title,
+    theme: session.value.theme,
+    isGroup: session.value.isGroup,
+    unreadCount: session.value.unreadCount,
+    statusBarTime: session.value.statusBarTime,
+    participants: session.value.participants,
+  }));
+
+  let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  watch(
+    settingsSnapshot,
+    () => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        session.value.updatedAt = Date.now();
+        draftMgr.saveDraft(session.value);
+      }, 500);
+    },
+    { deep: true }
+  );
+
   return {
     session,
     activeTab,
@@ -170,6 +189,7 @@ function useFakeChat() {
     updatePlatform: sessionOps.updatePlatform,
     updateTheme: sessionOps.updateTheme,
     toggleGroup: sessionOps.toggleGroup,
+    updateUnreadCount: sessionOps.updateUnreadCount,
     addParticipant: sessionOps.addParticipant,
     removeParticipant: sessionOps.removeParticipant,
     updateParticipant: sessionOps.updateParticipant,
