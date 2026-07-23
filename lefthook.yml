@@ -7,12 +7,12 @@ pre-commit:
   jobs:
     # oxfmt 代码格式化 (支持 TS 和 Vue 文件)
     - name: oxfmt format
-      run: pnpm oxfmt --write {staged_files}
+      run: node_modules/.bin/oxfmt --write {staged_files}
       glob: '*.{ts,tsx,vue}'
 
     # oxlint 检查 TS 文件
     - name: oxlint (TypeScript)
-      run: pnpm oxlint --config .oxlintrc.json {staged_files}
+      run: node_modules/.bin/oxlint --config .oxlintrc.json {staged_files}
       glob: '*.{ts,tsx}'
 
     # ESLint 检查 Vue 文件
@@ -36,7 +36,7 @@ pre-push:
   parallel: false # 是否并行执行任务，设置为 false 可保证任务按顺序执行，这样在Windows环境下会稳定一点
   jobs:
     - name: full lint check
-      run: pnpm oxlint --config .oxlintrc.json .
+      run: node_modules/.bin/oxlint --config .oxlintrc.json .
 
     - name: full type check
       run: pnpm vue-tsc --noEmit

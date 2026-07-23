@@ -14,6 +14,7 @@ export default [
     ignores: [
       'dist/**',
       'node_modules/**',
+      '**/uni_modules/**',
       'docs/**', // 文档目录
       '*.min.js',
       'public/**',

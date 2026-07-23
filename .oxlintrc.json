@@ -24,5 +24,14 @@
 
     "promise/prefer-await-to-callbacks": "off"
   },
-  "ignorePatterns": ["dist", "node_modules", "*.min.js", "public", ".vite", "**/*.d.ts", "docs"]
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "uni_modules",
+    "*.min.js",
+    "public",
+    ".vite",
+    "**/*.d.ts",
+    "docs"
+  ]
 }

@@ -17,6 +17,7 @@ declare module 'vue' {
     AdRewardedButton: typeof import('./components/ad-rewarded-button/ad-rewarded-button.vue')['default']
     AppCard: typeof import('./components/app-card/app-card.vue')['default']
     AppHeader: typeof import('./components/app-header/app-header.vue')['default']
+    ColorPickerPopup: typeof import('./components/color-picker-popup/color-picker-popup.vue')['default']
     EmptyState: typeof import('./components/empty-state/empty-state.vue')['default']
     ImagePreview: typeof import('./components/image-preview/image-preview.vue')['default']
     SectionTitle: typeof import('./components/section-title/section-title.vue')['default']
